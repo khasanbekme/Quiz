@@ -8,11 +8,13 @@ from quiz.models import (
     QuizQuestion,
     QuizQuestionGroup,
     AllowedUser,
+    UserAttempt,
+    QuizInstanceQuestion,
+    QuizInstanceOption,
 )
 from account.api.serializers import GradeSerializer
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from datetime import timedelta
 
 User = get_user_model()
 
@@ -189,3 +191,31 @@ class UserQuizSerializer(serializers.ModelSerializer):
             "left_attempts",
             "active",
         ]
+
+
+class OptionInstanceSerializer(serializers.ModelSerializer):
+    body_text = serializers.CharField(source="option.body_text")
+    body_photo = serializers.CharField(source="option.body_photo")
+
+    class Meta:
+        model = QuizInstanceOption
+        fields = ["id", "body_text", "body_photo", "option_order", "selected"]
+
+
+class QuestionInstanceSerializer(serializers.ModelSerializer):
+    body_text = serializers.CharField(source="question.body_text")
+    body_photo = serializers.CharField(source="question.body_photo")
+    options = OptionInstanceSerializer(source="options", many=True)
+    
+    class Meta:
+        model = QuizInstanceQuestion
+        fields = ["id", "group", "body_text", "body_photo", "question_order"]
+
+
+class UserAttemptSerializer(serializers.ModelSerializer):
+    quiz = UserQuizSerializer()
+    questions = QuestionInstanceSerializer(source="instance_questions", many=True)
+    
+    class Meta:
+        model = UserAttempt
+        fields = ["id", "quiz", "started_at", "end_time"]
