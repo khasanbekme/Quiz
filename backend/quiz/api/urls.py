@@ -17,6 +17,7 @@ from .views import (
     AllowedUserViewSet,
     AllowedUserBulkView,
     UserQuizView,
+    StartQuizView,
 )
 
 router = DefaultRouter()
@@ -50,4 +51,5 @@ urlpatterns = [
     path("excel-upload/", ExcelUploadView.as_view(), name="excel-upload"),
     path("user-quiz/", UserQuizView.as_view(), name="user-quiz"),
     path("user-quiz/<int:pk>/", UserQuizView.as_view(), name="user-quiz-retrieve"),
+    path("start-quiz/<int:pk>/", StartQuizView.as_view(), name="start-quiz"),
 ]

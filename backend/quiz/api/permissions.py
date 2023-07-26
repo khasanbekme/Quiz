@@ -5,6 +5,7 @@ from django.utils import timezone
 
 class StartQuizPermission(BasePermission):
     def has_object_permission(self, request, view, obj: Quiz):
+        print("checking......................")
         is_open = obj.status == 0
         now = timezone.localtime()
         no_active_attempts = (
@@ -13,6 +14,7 @@ class StartQuizPermission(BasePermission):
             ).count()
             == 0
         )
+        print("Result: ", no_active_attempts)
         has_attempts = obj.attempts - request.user.attempts.filter(quiz=obj).count() > 0
         quiz_permission = (
             obj.access == "private"

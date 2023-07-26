@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Button,
 	Dialog,
@@ -9,6 +9,7 @@ import {
 } from "@material-tailwind/react";
 import { Quiz } from "./Grid";
 import { formatTime } from "./QuizCard";
+import useAxiosPrivate from "../../../Hooks/useAxiosPrivate";
 
 type Props = {
 	open: boolean;
@@ -17,6 +18,31 @@ type Props = {
 };
 
 const StartDialog = ({ open, setOpen, quiz }: Props) => {
+	const axiosPrivate = useAxiosPrivate();
+	const [loading, setLoading] = useState(true); // New state variable for loading
+
+	useEffect(() => {
+		if (open) {
+			setLoading(false);
+		}
+	}, [open]);
+
+	const startQuiz = async () => {
+		try {
+			setLoading(true); // Set loading to true when starting the quiz
+			const response = await axiosPrivate.post(
+				`/quiz/start-quiz/${quiz?.id}/`
+			);
+			if (response.status === 200) {
+				console.log(response.data);
+				setLoading(false); // Set loading back to false when the request is successful
+			}
+		} catch (error) {
+			setLoading(false); // Set loading back to false in case of an error
+			// Handle error (e.g., show an error message)
+		}
+	};
+
 	if (!quiz) {
 		return null;
 	}
@@ -55,16 +81,18 @@ const StartDialog = ({ open, setOpen, quiz }: Props) => {
 			</DialogBody>
 			<DialogFooter>
 				<Button
-					variant="outlined"
-					color="red"
-					onClick={() => setOpen(false)}
-					className="mr-5"
-					size="sm"
+					variant="gradient"
+					onClick={startQuiz}
+					className="h-12 min-h-full min-w-full"
+					disabled={loading}
 				>
-					<span>Cancel</span>
-				</Button>
-				<Button variant="gradient" onClick={() => setOpen(false)}>
-					<span>Start</span>
+					{loading ? (
+						<div className="flex items-center justify-center px-6">
+							<div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-900" />
+						</div>
+					) : (
+						<span>Start</span>
+					)}
 				</Button>
 			</DialogFooter>
 		</Dialog>

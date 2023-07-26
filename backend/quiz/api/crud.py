@@ -24,11 +24,13 @@ def create_user_attempt(user, quiz) -> UserAttempt | None:
 
                     if group.random_questions:
                         questions = sample(list(questions), group.total_questions)
-                        question_orders = shuffle(
-                            list(range(1, group.total_questions + 1))
+                        question_orders = sample(
+                            list(range(1, group.total_questions + 1)),
+                            group.total_questions,
                         )
                     else:
                         question_orders = list(range(1, len(questions) + 1))
+                    print(question_orders)
 
                     for index, question in enumerate(questions):
                         bulk_question_list.append(
@@ -46,7 +48,7 @@ def create_user_attempt(user, quiz) -> UserAttempt | None:
 
                 if quiz.has_random_questions:
                     quiz_questions = sample(list(quiz_questions), quiz.total_questions)
-                    question_orders = shuffle(list(range(1, quiz.total_questions + 1)))
+                    question_orders = sample(list(range(1, quiz.total_questions + 1)), quiz.total_questions)
                 else:
                     quiz_questions = list(quiz_questions)
                     question_orders = list(range(1, len(quiz_questions) + 1))
@@ -96,5 +98,5 @@ def create_user_attempt(user, quiz) -> UserAttempt | None:
 
             return user_attempt
         except Exception as e:
-            logging.ERROR(e)
+            logging.exception(e)
             return None

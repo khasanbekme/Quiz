@@ -40,13 +40,19 @@ const Index = () => {
 
 	const fetchApiData = async (): Promise<Quiz[]> => {
 		const response = await axiosPrivate.get<Quiz[]>("/quiz/user-quiz/");
-		const data = response.data.map(({ start_time, end_time, ...value }) => {
-			return {
-				...value,
-				start_time: new Date(start_time),
-				end_time: new Date(end_time),
-			};
-		});
+		const data = response.data.map(
+			({ start_time, end_time, active, ...value }) => {
+				return {
+					...value,
+					start_time: new Date(start_time),
+					end_time: new Date(end_time),
+					active:
+						active !== null
+							? { ...active, end_time: active.end_time }
+							: null,
+				};
+			}
+		);
 		return data;
 	};
 

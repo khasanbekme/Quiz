@@ -165,7 +165,7 @@ class UserQuizSerializer(serializers.ModelSerializer):
             active = active_attempts.first()
             return {
                 "id": active.id,
-                "end_time": active.end_time,
+                "end_time": timezone.localtime(active.end_time),
             }
         else:
             return None
@@ -205,11 +205,11 @@ class OptionInstanceSerializer(serializers.ModelSerializer):
 class QuestionInstanceSerializer(serializers.ModelSerializer):
     body_text = serializers.CharField(source="question.body_text")
     body_photo = serializers.CharField(source="question.body_photo")
-    options = OptionInstanceSerializer(source="options", many=True)
+    options = OptionInstanceSerializer(many=True)
     
     class Meta:
         model = QuizInstanceQuestion
-        fields = ["id", "group", "body_text", "body_photo", "question_order"]
+        fields = ["id", "group", "body_text", "body_photo", "question_order", "options"]
 
 
 class UserAttemptSerializer(serializers.ModelSerializer):
@@ -218,4 +218,4 @@ class UserAttemptSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = UserAttempt
-        fields = ["id", "quiz", "started_at", "end_time"]
+        fields = ["id", "quiz", "started_at", "end_time", "is_completed", "completed_at", "questions"]

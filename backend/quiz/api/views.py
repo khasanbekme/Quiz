@@ -16,6 +16,7 @@ from .serializers import (
     BulkQuizQuestionSerializer,
     AllowedUserSerializer,
     UserQuizSerializer,
+    UserAttemptSerializer,
 )
 import base64
 from django.core.files.base import ContentFile
@@ -374,6 +375,9 @@ class StartQuizView(APIView):
 
         attempt = create_user_attempt(user, quiz)
         if attempt:
-            pass
+            serializer = UserAttemptSerializer(
+                attempt, context={"request": self.request}
+            )
+            return Response(serializer.data)
         else:
             return Response({"status": "error"}, status=500)
