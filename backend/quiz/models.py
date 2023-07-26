@@ -49,6 +49,9 @@ class QuestionOption(models.Model):
     order_number = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     is_correct = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ["order_number"]
+
 
 # quizzes base
 
@@ -199,13 +202,14 @@ class QuizQuestion(models.Model):
 
     class Meta:
         unique_together = ("quiz", "question")
+        ordering = ["order_number"]
 
 
 class UserAttempt(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="attempts")
-    started_at = models.DateTimeField()
-    end_time = models.DateTimeField()
+    started_at = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
     is_completed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True)
 
@@ -217,10 +221,10 @@ class QuizInstanceQuestion(models.Model):
     group = models.ForeignKey(QuizQuestionGroup, on_delete=models.CASCADE, null=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     question_order = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-    score = models.PositiveIntegerField()
+    score = models.PositiveIntegerField(default=1)
 
     class Meta:
-        unique_together = ("quiz_instance", "question")
+        unique_together = ("user_attempt", "question")
 
 
 class QuizInstanceOption(models.Model):

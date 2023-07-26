@@ -21,10 +21,9 @@ import base64
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from django.http import Http404
-from django.utils import timezone
-from datetime import timedelta
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Max, Q
+from quiz.api.crud import create_user_attempt
 from quiz.models import (
     QuestionCategory,
     Question,
@@ -372,4 +371,9 @@ class StartQuizView(APIView):
     def post(self, request, pk):
         quiz = self.get_object(pk)
         user = request.user
-        
+
+        attempt = create_user_attempt(user, quiz)
+        if attempt:
+            pass
+        else:
+            return Response({"status": "error"}, status=500)
