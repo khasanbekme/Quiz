@@ -27,6 +27,7 @@ export type Quiz = {
 	end_time: Date;
 	questions: number;
 	question_groups: QuestionGroup[] | null;
+	past_attempts: number;
 	left_attempts: number;
 	active: { id: number; end_time: Date } | null;
 };
@@ -46,10 +47,9 @@ const Index = () => {
 					...value,
 					start_time: new Date(start_time),
 					end_time: new Date(end_time),
-					active:
-						active !== null
-							? { ...active, end_time: active.end_time }
-							: null,
+					active: active
+						? { ...active, end_time: new Date(active.end_time) }
+						: null,
 				};
 			}
 		);

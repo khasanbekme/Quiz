@@ -36,6 +36,12 @@ class Question(models.Model):
     def total_options(self):
         return self.options.count()
 
+    @property
+    def body_photo_url(self):
+        if self.body_photo:
+            return self.body_photo.url
+        return None
+
     def __str__(self):
         return self.body_text[:50]
 
@@ -48,6 +54,12 @@ class QuestionOption(models.Model):
     body_photo = models.ImageField(upload_to="options/", null=True, blank=True)
     order_number = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     is_correct = models.BooleanField(default=False)
+
+    @property
+    def body_photo_url(self):
+        if self.body_photo:
+            return self.body_photo.url
+        return None
 
     class Meta:
         ordering = ["order_number"]
@@ -224,6 +236,7 @@ class QuizInstanceQuestion(models.Model):
     score = models.PositiveIntegerField(default=1)
 
     class Meta:
+        ordering = ["question_order"]
         unique_together = ("user_attempt", "question")
 
 
@@ -236,4 +249,5 @@ class QuizInstanceOption(models.Model):
     selected = models.BooleanField(default=False)
 
     class Meta:
+        ordering = ["option_order"]
         unique_together = ("question_instance", "option")

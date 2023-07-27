@@ -369,7 +369,7 @@ class StartQuizView(APIView):
         except Quiz.DoesNotExist:
             return Http404
 
-    def post(self, request, pk):
+    def get(self, request, pk):
         quiz = self.get_object(pk)
         user = request.user
 

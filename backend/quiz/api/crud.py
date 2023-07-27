@@ -25,12 +25,11 @@ def create_user_attempt(user, quiz) -> UserAttempt | None:
                     if group.random_questions:
                         questions = sample(list(questions), group.total_questions)
                         question_orders = sample(
-                            list(range(1, group.total_questions + 1)),
+                            list(range(group.total_questions)),
                             group.total_questions,
                         )
                     else:
-                        question_orders = list(range(1, len(questions) + 1))
-                    print(question_orders)
+                        question_orders = list(range(len(questions)))
 
                     for index, question in enumerate(questions):
                         bulk_question_list.append(
@@ -48,10 +47,10 @@ def create_user_attempt(user, quiz) -> UserAttempt | None:
 
                 if quiz.has_random_questions:
                     quiz_questions = sample(list(quiz_questions), quiz.total_questions)
-                    question_orders = sample(list(range(1, quiz.total_questions + 1)), quiz.total_questions)
+                    question_orders = sample(list(range(quiz.total_questions)), quiz.total_questions)
                 else:
                     quiz_questions = list(quiz_questions)
-                    question_orders = list(range(1, len(quiz_questions) + 1))
+                    question_orders = list(range(len(quiz_questions)))
 
                 for index, quiz_question in enumerate(quiz_questions):
                     bulk_question_list.append(
@@ -71,7 +70,7 @@ def create_user_attempt(user, quiz) -> UserAttempt | None:
             bulk_options_list = []
 
             for new_question in created_questions:
-                options = new_question.question.options.all()
+                options = list(new_question.question.options.all())
 
                 if (
                     quiz.grouped_questions

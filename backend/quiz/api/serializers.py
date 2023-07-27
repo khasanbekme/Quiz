@@ -139,15 +139,19 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
 
 class UserQuizSerializer(serializers.ModelSerializer):
     category = QuizCategorySerializer()
+    past_attempts = serializers.SerializerMethodField()
     left_attempts = serializers.SerializerMethodField()
     active = serializers.SerializerMethodField()
     question_groups = serializers.SerializerMethodField()
-
-    def get_left_attempts(self, obj: Quiz):
+    
+    def get_past_attempts(self, obj: Quiz):
         request = self.context.get("request")
         user: User = request.user if request else None
         past_attempts = user.attempts.filter(quiz=obj).count()
-        return obj.attempts - past_attempts
+        return past_attempts
+
+    def get_left_attempts(self, obj: Quiz):
+        return obj.attempts - self.get_past_attempts(obj)
 
     def get_active(self, obj: Quiz):
         if obj.status != 0:
@@ -188,6 +192,7 @@ class UserQuizSerializer(serializers.ModelSerializer):
             "end_time",
             "questions",
             "question_groups",
+            "past_attempts",
             "left_attempts",
             "active",
         ]
@@ -195,7 +200,7 @@ class UserQuizSerializer(serializers.ModelSerializer):
 
 class OptionInstanceSerializer(serializers.ModelSerializer):
     body_text = serializers.CharField(source="option.body_text")
-    body_photo = serializers.CharField(source="option.body_photo")
+    body_photo = serializers.CharField(source="option.body_photo_url")
 
     class Meta:
         model = QuizInstanceOption
@@ -204,9 +209,9 @@ class OptionInstanceSerializer(serializers.ModelSerializer):
 
 class QuestionInstanceSerializer(serializers.ModelSerializer):
     body_text = serializers.CharField(source="question.body_text")
-    body_photo = serializers.CharField(source="question.body_photo")
+    body_photo = serializers.CharField(source="question.body_photo_url")
     options = OptionInstanceSerializer(many=True)
-    
+
     class Meta:
         model = QuizInstanceQuestion
         fields = ["id", "group", "body_text", "body_photo", "question_order", "options"]
@@ -215,7 +220,15 @@ class QuestionInstanceSerializer(serializers.ModelSerializer):
 class UserAttemptSerializer(serializers.ModelSerializer):
     quiz = UserQuizSerializer()
     questions = QuestionInstanceSerializer(source="instance_questions", many=True)
-    
+
     class Meta:
         model = UserAttempt
-        fields = ["id", "quiz", "started_at", "end_time", "is_completed", "completed_at", "questions"]
+        fields = [
+            "id",
+            "quiz",
+            "started_at",
+            "end_time",
+            "is_completed",
+            "completed_at",
+            "questions",
+        ]

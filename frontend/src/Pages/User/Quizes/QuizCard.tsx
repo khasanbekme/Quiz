@@ -46,6 +46,7 @@ const formatDeltaTime = (a: Date, b: Date): string => {
 };
 
 const quizStatus = (quiz: Quiz, now: Date) => {
+	// console.log(quiz.start_time, now, quiz.end_time);
 	if (now < quiz.start_time) {
 		return -1;
 	} else if (now >= quiz.start_time && now <= quiz.end_time) {
@@ -98,12 +99,12 @@ const QuizCard = ({ quiz, now, setOpenStart, setSelectedQuiz }: Props) => {
 			<CardFooter className="flex w-full justify-center">
 				<Button
 					fullWidth
-					disabled={
-						status !== 0 ||
-						(quiz.active
-							? now > quiz.active.end_time
-							: quiz.left_attempts === 0)
-					}
+					// disabled={
+					// 	status !== 0 ||
+					// 	(quiz.active
+					// 		? now > quiz.active.end_time
+					// 		: quiz.left_attempts === 0)
+					// }
 					onClick={buttonClick}
 					size="lg"
 				>
@@ -117,7 +118,9 @@ const QuizCard = ({ quiz, now, setOpenStart, setSelectedQuiz }: Props) => {
 								? "Start"
 								: "Finished"
 							: quiz.left_attempts > 0
-							? "Start"
+							? quiz.past_attempts > 0
+								? "Take again"
+								: "Start"
 							: "Finished"
 						: formatDeltaTime(now, quiz.start_time)}
 				</Button>

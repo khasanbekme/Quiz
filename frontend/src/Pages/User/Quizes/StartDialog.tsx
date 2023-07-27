@@ -30,7 +30,7 @@ const StartDialog = ({ open, setOpen, quiz }: Props) => {
 	const startQuiz = async () => {
 		try {
 			setLoading(true); // Set loading to true when starting the quiz
-			const response = await axiosPrivate.post(
+			const response = await axiosPrivate.get(
 				`/quiz/start-quiz/${quiz?.id}/`
 			);
 			if (response.status === 200) {
