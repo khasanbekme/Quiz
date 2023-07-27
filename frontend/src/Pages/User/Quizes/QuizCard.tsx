@@ -99,12 +99,12 @@ const QuizCard = ({ quiz, now, setOpenStart, setSelectedQuiz }: Props) => {
 			<CardFooter className="flex w-full justify-center">
 				<Button
 					fullWidth
-					// disabled={
-					// 	status !== 0 ||
-					// 	(quiz.active
-					// 		? now > quiz.active.end_time
-					// 		: quiz.left_attempts === 0)
-					// }
+					disabled={
+						status !== 0 ||
+						(quiz.active
+							? now > quiz.active.end_time
+							: quiz.left_attempts === 0)
+					}
 					onClick={buttonClick}
 					size="lg"
 				>
