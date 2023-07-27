@@ -42,7 +42,7 @@ from quiz.models import (
 
 from rest_framework.filters import SearchFilter
 from .filters import CustomIdFilter, CustomQuestionFilter
-from .permissions import has_start_permission
+from .permissions import StartQuizPermission
 import random
 from django.contrib.auth import get_user_model
 
@@ -374,8 +374,7 @@ class StartQuizView(APIView):
 
     def post(self, request, pk):
         quiz = self.get_object(pk)
-        if not has_start_permission(request, quiz):
-            return Response({"detail": "Forbidden"}, status=403)
+        self.check_object_permissions(request, quiz)
 
         attempt = create_user_attempt(request.user, quiz)
         if attempt:
@@ -386,7 +385,16 @@ class StartQuizView(APIView):
         else:
             return Response({"status": "error"}, status=500)
 
-
-class GetUserAttempt(generics.RetrieveAPIView):
+   
+class GetUserAttempt(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = UserAttemptSerializer
+
+    def get_object(self, pk):
+        obj = get_object_or_404(UserAttempt, pk=pk)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+    def get(self, pk):
+        obj = self.get_object(pk)
+        serializer = UserAttemptSerializer(obj)
+        return Response(serializer.data)
