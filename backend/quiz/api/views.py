@@ -111,35 +111,38 @@ class ExcelUploadView(APIView):
     def post(self, request):
         serializer = ExcelUploadSerializer(data=request.data)
         if serializer.is_valid():
-            excel_file = serializer.validated_data["excel_file"]
-            category_id = serializer.validated_data["category"]
-            options = serializer.validated_data["options"]
+            try:
+                excel_file = serializer.validated_data["excel_file"]
+                category_id = serializer.validated_data["category"]
+                options = serializer.validated_data["options"]
 
-            wb = load_workbook(excel_file)
-            ws = wb.active
-            orders = [i for i in range(1, options + 1)]
+                wb = load_workbook(excel_file)
+                ws = wb.active
+                orders = [i for i in range(1, options + 1)]
 
-            for row in ws.iter_rows(min_row=2, values_only=True):
-                random.shuffle(orders)
-                if category_id != 0:
-                    new_question = Question.objects.create(
-                        category_id=category_id, body_text=row[0]
-                    )
-                else:
-                    new_question = Question.objects.create(body_text=row[0])
-                QuestionOption.objects.create(
-                    question=new_question,
-                    body_text=row[1],
-                    order_number=orders[0],
-                    is_correct=True,
-                )
-                for i in range(2, options + 1):
+                for row in ws.iter_rows(min_row=2, values_only=True):
+                    random.shuffle(orders)
+                    if category_id != 0:
+                        new_question = Question.objects.create(
+                            category_id=category_id, body_text=row[0]
+                        )
+                    else:
+                        new_question = Question.objects.create(body_text=row[0])
                     QuestionOption.objects.create(
                         question=new_question,
-                        body_text=row[i],
-                        order_number=orders[i - 1],
+                        body_text=row[1],
+                        order_number=orders[0],
+                        is_correct=True,
                     )
-            return Response({"status": "success"}, status=201)
+                    for i in range(2, options + 1):
+                        QuestionOption.objects.create(
+                            question=new_question,
+                            body_text=row[i],
+                            order_number=orders[i - 1],
+                        )
+                return Response({"status": "success"}, status=201)
+            except Exception as er:
+                return Response({"detail": str(er)}, status=500)
         else:
             return Response({"status": serializer.errors}, status=400)
 
@@ -369,10 +372,10 @@ class StartQuizView(APIView):
         except Quiz.DoesNotExist:
             return Http404
 
-    def get(self, request, pk):
+    def post(self, request, pk):
         quiz = self.get_object(pk)
         if not has_start_permission(request, quiz):
-            return Response({"detail": "Unauthorized"}, status=403)
+            return Response({"detail": "Forbidden"}, status=403)
 
         attempt = create_user_attempt(request.user, quiz)
         if attempt:
@@ -382,3 +385,8 @@ class StartQuizView(APIView):
             return Response(serializer.data)
         else:
             return Response({"status": "error"}, status=500)
+
+
+class GetUserAttempt(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserAttemptSerializer

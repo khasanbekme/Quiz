@@ -103,7 +103,7 @@ const QuizCard = ({ quiz, now, setOpenStart, setSelectedQuiz }: Props) => {
 						status !== 0 ||
 						(quiz.active
 							? now > quiz.active.end_time
-							: quiz.left_attempts === 0)
+							: quiz.left_attempts <= 0)
 					}
 					onClick={buttonClick}
 					size="lg"
