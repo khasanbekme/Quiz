@@ -1,12 +1,12 @@
 from random import sample, shuffle
 from datetime import timedelta
 from django.utils import timezone
-from quiz.models import UserAttempt, QuizInstanceQuestion, QuizInstanceOption
+from quiz.models import UserAttempt, QuizInstanceQuestion, QuizInstanceOption, Quiz
 from django.db import transaction
 import logging
 
 
-def create_user_attempt(user, quiz) -> UserAttempt | None:
+def create_user_attempt(user, quiz: Quiz) -> UserAttempt | None:
     with transaction.atomic():
         try:
             # Create the user attempt instance
@@ -92,7 +92,7 @@ def create_user_attempt(user, quiz) -> UserAttempt | None:
             # Calculate the end time based on the quiz duration
             start_time = timezone.localtime()
             user_attempt.started_at = start_time
-            user_attempt.end_time = start_time + timedelta(minutes=quiz.duration)
+            user_attempt.end_time = min(start_time + timedelta(minutes=quiz.duration), quiz.end_time)
             user_attempt.save()
 
             return user_attempt

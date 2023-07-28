@@ -7,6 +7,7 @@ import {
 } from "@material-tailwind/react";
 import { format } from "date-fns";
 import { Quiz } from "./Grid";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
 	quiz: Quiz;
@@ -45,21 +46,13 @@ const formatDeltaTime = (a: Date, b: Date): string => {
 	return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
 
-const quizStatus = (quiz: Quiz, now: Date) => {
-	// console.log(quiz.start_time, now, quiz.end_time);
-	if (now < quiz.start_time) {
-		return -1;
-	} else if (now >= quiz.start_time && now <= quiz.end_time) {
-		return 0;
-	} else {
-		return 1;
-	}
-};
-
 const QuizCard = ({ quiz, now, setOpenStart, setSelectedQuiz }: Props) => {
-	const status = quizStatus(quiz, now);
+	const navigate = useNavigate();
 
 	const buttonClick = () => {
+		if (quiz.status === 0 && quiz.active) {
+			navigate(`/user/attempt/${quiz.active?.id}`);
+		}
 		setSelectedQuiz(quiz);
 		setOpenStart(true);
 	};
@@ -67,9 +60,9 @@ const QuizCard = ({ quiz, now, setOpenStart, setSelectedQuiz }: Props) => {
 	return (
 		<Card
 			className={`${
-				status === -1
-					? "bg-white"
-					: status === 0
+				quiz.status === -1
+					? ""
+					: quiz.status === 0
 					? "bg-green-200"
 					: "bg-gray-200"
 			} w-80 max-h-96 shadow-xl`}
@@ -100,7 +93,7 @@ const QuizCard = ({ quiz, now, setOpenStart, setSelectedQuiz }: Props) => {
 				<Button
 					fullWidth
 					disabled={
-						status !== 0 ||
+						quiz.status !== 0 ||
 						(quiz.active
 							? now > quiz.active.end_time
 							: quiz.left_attempts <= 0)
@@ -108,9 +101,11 @@ const QuizCard = ({ quiz, now, setOpenStart, setSelectedQuiz }: Props) => {
 					onClick={buttonClick}
 					size="lg"
 				>
-					{status === 1
+					{quiz.status === 1
 						? "Finished"
-						: status === 0
+						: quiz.status === -1
+						? formatDeltaTime(now, quiz.start_time)
+						: quiz.status === 0
 						? quiz.active
 							? now <= quiz.active.end_time
 								? "Continue"
@@ -122,7 +117,11 @@ const QuizCard = ({ quiz, now, setOpenStart, setSelectedQuiz }: Props) => {
 								? "Take again"
 								: "Start"
 							: "Finished"
-						: formatDeltaTime(now, quiz.start_time)}
+						: quiz.left_attempts > 0
+						? quiz.past_attempts > 0
+							? "Take again"
+							: "Start"
+						: "Finished"}
 				</Button>
 			</CardFooter>
 		</Card>

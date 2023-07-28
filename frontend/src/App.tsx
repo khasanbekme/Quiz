@@ -27,8 +27,9 @@ import QuizCategoryList from "./Pages/Admin/Quiz/Category/CategoryList";
 import QuizList from "./Pages/Admin/Quiz/Category/QuizList/QuizList";
 import QuizEdit from "./Pages/Admin/Quiz/Category/QuizEdit/QuizEdit";
 import GradeList from "./Pages/Admin/Users/Grades/List";
+import UserAttemptPage from "./Pages/User/UserAttempt/UserAttempt";
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 const LogOut = () => {
 	const { logoutUser } = useAuth();
@@ -97,6 +98,10 @@ function App() {
 										<ProfileUser />
 									</UserContent>
 								}
+							/>
+							<Route
+								path="attempt/:attemptId"
+								element={<UserAttemptPage />}
 							/>
 						</Route>
 					</Routes>

@@ -10,6 +10,7 @@ import {
 import { Quiz } from "./Grid";
 import { formatTime } from "./QuizCard";
 import useAxiosPrivate from "../../../Hooks/useAxiosPrivate";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
 	open: boolean;
@@ -19,6 +20,7 @@ type Props = {
 
 const StartDialog = ({ open, setOpen, quiz }: Props) => {
 	const axiosPrivate = useAxiosPrivate();
+	const navigate = useNavigate();
 	const [loading, setLoading] = useState(true); // New state variable for loading
 
 	useEffect(() => {
@@ -34,8 +36,8 @@ const StartDialog = ({ open, setOpen, quiz }: Props) => {
 				`/quiz/start-quiz/${quiz?.id}/`
 			);
 			if (response.status === 200) {
-				console.log(response.data);
 				setLoading(false); // Set loading back to false when the request is successful
+				navigate(`/user/attempt/${response.data["attempt_id"]}`);
 			}
 		} catch (error) {
 			setLoading(false); // Set loading back to false in case of an error

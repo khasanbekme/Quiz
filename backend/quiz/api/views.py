@@ -42,7 +42,7 @@ from quiz.models import (
 
 from rest_framework.filters import SearchFilter
 from .filters import CustomIdFilter, CustomQuestionFilter
-from .permissions import StartQuizPermission
+from .permissions import StartQuizPermission, UserAttemptPermission
 import random
 from django.contrib.auth import get_user_model
 
@@ -364,7 +364,7 @@ class UserQuizView(generics.ListAPIView):
 
 
 class StartQuizView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, StartQuizPermission]
 
     def get_object(self, pk):
         try:
@@ -374,27 +374,25 @@ class StartQuizView(APIView):
 
     def post(self, request, pk):
         quiz = self.get_object(pk)
-        self.check_object_permissions(request, quiz)
+        self.check_object_permissions(self.request, quiz)
 
         attempt = create_user_attempt(request.user, quiz)
         if attempt:
-            serializer = UserAttemptSerializer(
-                attempt, context={"request": self.request}
-            )
-            return Response(serializer.data)
+            return Response({"attempt_id": attempt.id})
         else:
             return Response({"status": "error"}, status=500)
 
-   
+
 class GetUserAttempt(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserAttemptSerializer
+    permission_classes = [permissions.IsAuthenticated, UserAttemptPermission]
 
     def get_object(self, pk):
         obj = get_object_or_404(UserAttempt, pk=pk)
         self.check_object_permissions(self.request, obj)
         return obj
 
-    def get(self, pk):
+    def get(self, request, pk):
         obj = self.get_object(pk)
         serializer = UserAttemptSerializer(obj)
         return Response(serializer.data)

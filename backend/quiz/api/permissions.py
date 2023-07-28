@@ -4,7 +4,7 @@ from django.utils import timezone
 
 
 class StartQuizPermission(BasePermission):
-    def has_start_permission(request, obj: Quiz):
+    def has_object_permission(self, request, view, obj: Quiz):
         is_open = obj.status == 0
         now = timezone.localtime()
         no_active_attempts = (
@@ -23,8 +23,8 @@ class StartQuizPermission(BasePermission):
         return is_open and no_active_attempts and has_attempts and quiz_permission
 
 
-class UserAttemptSerializer(BasePermission):
-    def has_start_permission(request, obj: UserAttempt):
+class UserAttemptPermission(BasePermission):
+    def has_object_permission(self, request, view, obj: UserAttempt):
         now = timezone.localtime()
 
         return (

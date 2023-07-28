@@ -142,8 +142,8 @@ class UserQuizSerializer(serializers.ModelSerializer):
     past_attempts = serializers.SerializerMethodField()
     left_attempts = serializers.SerializerMethodField()
     active = serializers.SerializerMethodField()
-    question_groups = serializers.SerializerMethodField()
-    
+    question_groups = QuestionGroupSerializer(many=True)
+
     def get_past_attempts(self, obj: Quiz):
         request = self.context.get("request")
         user: User = request.user if request else None
@@ -173,12 +173,6 @@ class UserQuizSerializer(serializers.ModelSerializer):
             }
         else:
             return None
-
-    def get_question_groups(self, obj: Quiz):
-        if not obj.grouped_questions:
-            return None
-        group_serializer = QuestionGroupSerializer(obj.question_groups.all(), many=True)
-        return group_serializer.data
 
     class Meta:
         model = Quiz
@@ -217,8 +211,24 @@ class QuestionInstanceSerializer(serializers.ModelSerializer):
         fields = ["id", "group", "body_text", "body_photo", "question_order", "options"]
 
 
+class AttemptQuizSerializer(serializers.ModelSerializer):
+    category = QuizCategorySerializer()
+    question_groups = QuestionGroupSerializer(many=True)
+
+    class Meta:
+        model = Quiz
+        fields = [
+            "id",
+            "title",
+            "description",
+            "category",
+            "grouped_questions",
+            "question_groups",
+        ]
+
+
 class UserAttemptSerializer(serializers.ModelSerializer):
-    quiz = UserQuizSerializer()
+    quiz = AttemptQuizSerializer()
     questions = QuestionInstanceSerializer(source="instance_questions", many=True)
 
     class Meta:
