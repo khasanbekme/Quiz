@@ -33,7 +33,7 @@ export function formatTime(minutes: number): string {
 	}
 }
 
-const formatDeltaTime = (a: Date, b: Date): string => {
+export const formatDeltaTime = (a: Date, b: Date): string => {
 	let seconds = Math.abs(Math.floor((a.getTime() - b.getTime()) / 1000));
 	const hours = Math.floor(seconds / 3600);
 	const minutes = Math.floor((seconds % 3600) / 60);

@@ -224,6 +224,17 @@ class UserAttempt(models.Model):
     end_time = models.DateTimeField(null=True)
     is_completed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True)
+    
+    @property
+    def status(self):
+        current_time = timezone.localtime()
+
+        if current_time < self.started_at:
+            return -1
+        elif current_time >= self.started_at and current_time <= self.end_time:
+            return 0
+        else:
+            return 1
 
 
 class QuizInstanceQuestion(models.Model):

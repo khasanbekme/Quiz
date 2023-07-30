@@ -19,6 +19,7 @@ from .views import (
     UserQuizView,
     StartQuizView,
     GetUserAttempt,
+    SelectQuestionOption,
 )
 
 router = DefaultRouter()
@@ -54,4 +55,5 @@ urlpatterns = [
     path("user-quiz/<int:pk>/", UserQuizView.as_view(), name="user-quiz-retrieve"),
     path("start-quiz/<int:pk>/", StartQuizView.as_view(), name="start-quiz"),
     path("user-attempt/<int:pk>/", GetUserAttempt.as_view(), name="get-user-attempt"),
+    path("select-option/", SelectQuestionOption.as_view(), name="select-option"),
 ]

@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, pagination, generics
+from rest_framework import viewsets, permissions, pagination, generics, status
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -24,6 +24,7 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Max, Q
+from django.db import transaction
 from quiz.api.crud import create_user_attempt
 from quiz.models import (
     QuestionCategory,
@@ -380,7 +381,7 @@ class StartQuizView(APIView):
         if attempt:
             return Response({"attempt_id": attempt.id})
         else:
-            return Response({"status": "error"}, status=500)
+            return Response({"status": "error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class GetUserAttempt(APIView):
@@ -396,3 +397,28 @@ class GetUserAttempt(APIView):
         obj = self.get_object(pk)
         serializer = UserAttemptSerializer(obj)
         return Response(serializer.data)
+
+
+class SelectQuestionOption(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        question_id = request.data.get("questionId")
+        option_id = request.data.get("optionId")
+
+        question = get_object_or_404(
+            QuizInstanceQuestion.objects.select_related("user_attempt", "user_attempt__user").prefetch_related("options"),
+            id=question_id
+        )
+
+        if (
+            question.user_attempt.user != request.user
+            or not question.options.filter(id=option_id).exists()
+            or question.user_attempt.status != 0
+        ):
+            return Response({"detail": "error"}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            with transaction.atomic():
+                question.options.update(selected=False)
+                QuizInstanceOption.objects.filter(id=option_id).update(selected=True)
+                return Response({"status": "ok"}, status=status.HTTP_200_OK)

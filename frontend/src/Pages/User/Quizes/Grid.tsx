@@ -132,7 +132,7 @@ const Index = () => {
 			<div className="flex flex-row">
 				<div className="flex flex-col gap-5 sm:flex-row">
 					<Button
-						color="white"
+						color="light-blue"
 						className="rounded-full"
 						onClick={() => setQuizFilter(QuizFilters.ALL)}
 					>
